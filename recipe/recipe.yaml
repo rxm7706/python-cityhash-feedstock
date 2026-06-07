@@ -40,12 +40,19 @@ tests:
   - python:
       imports:
         - cityhash
-        - cityhashcrc
+        # cityhashcrc requires SSE4.2 intrinsics that upstream doesn't build
+        # on Windows — skip there. linux/osx ship all three modules from the
+        # same compile.
+        - if: not win
+          then:
+            - cityhashcrc
         - farmhash
       pip_check: true
-      python_version:
-        - ${{ python_min }}.*
-        - "*"
+      # No python_version — this is a per-Python compiled extension, so the
+      # test env's python matches the build variant automatically. The
+      # CFEP-25 dual-version matrix [${{ python_min }}.*, "*"] is for
+      # noarch:python only — using it here pinned the test env to py3.10
+      # regardless of the build variant, breaking py3.11+ native builds.
 
 about:
   homepage: https://pypi.org/project/cityhash
